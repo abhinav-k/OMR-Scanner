@@ -1,0 +1,63 @@
+function solution = findsolution(Input)
+cutheight=60;
+cutWidth=49;
+sizeInput=size(Input);
+InversedGrayScaleImage=imcomplement(Input);
+FilteredMedian=medfilt2(InversedGrayScaleImage,[3 3]);
+BinaryInverse=im2bw(FilteredMedian,graythresh(FilteredMedian));
+FilteredImageBWReader=medfilt2(BinaryInverse,[3 3]);
+StrellHandler=strel('square',3);
+ErrodedImage=~imerode(~FilteredImageBWReader,StrellHandler);
+%figure(999),imshow(ErrodedImage);
+IndividualPieces=cell(25);
+columnPieces=cell(5);
+columnPiecesHistogram=cell(5);
+chosen=cell(5);
+solution1=cell(25);
+for i = 1:25
+    IndividualPieces{i}=imcrop(ErrodedImage,[1,((i-1)*cutheight)+1,sizeInput(1,2),cutheight]);
+    
+    for j=1:5
+        columnPieces{j}=imcrop(IndividualPieces{i},[((j-1)*cutWidth)+1,1,cutWidth,sizeInput(1,1)]);
+        %figure(25*i+j),imshow(columnPieces{j});
+        columnPiecesHistogram{j}=imhist(columnPieces{j});
+        black= columnPiecesHistogram{j}(1,1);
+        white=columnPiecesHistogram{j}(2,1);
+            if white>black && white > ((black+white)/2)
+                chosen{j}=1;
+            else
+                chosen{j}=0;
+            end
+            
+    end
+        count=0;
+        temppp=0;
+        for j=1:5
+            if chosen{j}==1
+                count=count+1;
+                temppp=j;
+            end
+            
+        end
+        if count~=1
+            
+                solution1{i}='NULL';
+        
+        else
+                switch temppp
+                    case 1
+                        solution1{i}='A';
+                        case 2
+                        solution1{i}='B';
+                        case 3
+                        solution1{i}='C';
+                        case 4
+                        solution1{i}='D';
+                        case 5
+                        solution1{i}='E';
+                end
+        end
+                
+end
+solution=solution1;
+end
