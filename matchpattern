@@ -1,0 +1,16 @@
+function newBoxPolygon = matchPattern(sceneImage,boxImage)
+boxPoints = detectSURFFeatures(boxImage);
+scenePoints = detectSURFFeatures(sceneImage);
+[boxFeatures, boxPoints] = extractFeatures(boxImage, boxPoints);
+[sceneFeatures, scenePoints] = extractFeatures(sceneImage, scenePoints);
+boxPairs = matchFeatures(boxFeatures, sceneFeatures);
+matchedBoxPoints = boxPoints(boxPairs(:, 1), :);
+matchedScenePoints = scenePoints(boxPairs(:, 2), :);
+[tform, inlierBoxPoints, inlierScenePoints] =estimateGeometricTransform(matchedBoxPoints, matchedScenePoints, 'affine');
+boxPolygon = [1, 1;size(boxImage, 2), 1;size(boxImage, 2), size(boxImage, 1);1, size(boxImage, 1);1, 1];
+newBoxPolygon = transformPointsForward(tform, boxPolygon);
+figure; imshow(sceneImage);
+hold on;
+line(newBoxPolygon(:, 1), newBoxPolygon(:, 2), 'Color', 'r');
+
+end
